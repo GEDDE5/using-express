@@ -15,17 +15,9 @@ server.get('/urls', (request, response) => {
   response.render('urls_index', { urls: urlDatabase })
 });
 
-// server.get('/urls/:id', (request, response) => {
-//   let templateVars = { shortURL: request.params.id, urls: urlDatabase };
-//   response.render('urls_show', templateVars);
-// });
-
-server.get('/urls/new', (request, response) => {
-  response.render('urls_new');
-});
-
 server.post('/urls', (request, response) => {
-  console.log(request.body);
+
+  // only adds shortURL to database if it doesn't already exist
   let str = randomStr.get();
   if (urlDatabase[str]) {
     while (urlDatabase[str]) {
@@ -33,9 +25,17 @@ server.post('/urls', (request, response) => {
     }
   }
   urlDatabase[str] = request.body['longURL'];
-  console.log(urlDatabase);
-  response.send('OK');
+  response.redirect('/urls/' + str);
 })
+
+server.get('/urls/new', (request, response) => {
+  response.render('urls_new');
+});
+
+server.get('/urls/:id', (request, response) => {
+  let templateVars = { shortURL: request.params.id, urls: urlDatabase };
+  response.render('urls_show', templateVars);
+});
 
 // server.get("/", (request, response) => {
 //   console.log(request);
