@@ -37,6 +37,16 @@ server.get('/urls/:id', (request, response) => {
   response.render('urls_show', templateVars);
 });
 
+server.get('/u/:shortURL', (request, response) => {
+  let shortURL = request.params.shortURL
+  let longURL = urlDatabase[shortURL];
+  let protocol = 'http://';
+  if (!longURL.includes('http://')) {
+    longURL = protocol + longURL;
+  }
+  response.redirect(longURL);
+})
+
 // server.get("/", (request, response) => {
 //   console.log(request);
 //   response.send("Hello!");
