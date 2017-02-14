@@ -19,6 +19,15 @@ server.get('/urls/:id', (request, response) => {
   response.render('urls_show', templateVars);
 });
 
+server.get('/urls/new', (request, response) => {
+  response.render('urls_new');
+});
+
+server.post('/urls', (request, response) => {
+  console.log(request.body);
+  response.send('OK');
+})
+
 // server.get("/", (request, response) => {
 //   console.log(request);
 //   response.send("Hello!");
