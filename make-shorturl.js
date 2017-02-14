@@ -4,7 +4,7 @@ function generateRandomString() {
   for (let x = 0; x < 6; x++) {
     str += chars[Math.ceil(Math.random() * chars.length)];
   }
-  return console.log(str);
+  return str;
 }
 
-generateRandomString();
+module.exports = { get: generateRandomString };
