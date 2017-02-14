@@ -1,6 +1,8 @@
 const server = require("express")();
+const bodyParser = require("body-parser");
 const PORT = process.env.PORT || 8080;
 
+server.use(bodyParser.urlencoded({ extended: true }));
 server.set("view engine", "ejs");
 
 const urlDatabase = {
