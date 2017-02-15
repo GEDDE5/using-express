@@ -66,6 +66,11 @@ server.post('/login', (request, response) => {
   response.redirect('/urls');
 });
 
+server.post('/logout', (request, response) => {
+  response.clearCookie('username');
+  response.redirect('/urls');
+});
+
 server.get('/urls/new', (request, response) => {
   response.render('urls_new', { username: request.cookies['username'] });
 });
