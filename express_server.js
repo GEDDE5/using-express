@@ -1,6 +1,5 @@
 const express = require('express');
 const bodyParser = require("body-parser");
-const randomStr = require('./make-shorturl');
 const cookieParser = require('cookie-parser')
 const morgan = require('morgan');
 
@@ -25,6 +24,16 @@ const urlDatabase = {
 };
 
 // Helper functions
+function generateRandomString() {
+  let chars = 'abcdefghijklmnopqrstufwxyzABCDEFGHIJKLMNOPQRSTUFWXYZ1234567890';
+  let str = '';
+  for (let x = 0; x < 6; x++) {
+    let letter = Math.ceil(Math.random() * chars.length - 1);
+    str += chars[letter];
+  }
+  return str;
+}
+
 function toHTTP(str) {
   if(str) {
     let scheme='http://';
@@ -48,10 +57,10 @@ server.get('/urls', (request, response) => {
 server.post('/urls', (request, response) => {
   // if shortURL alreadys exists in database, generate one
   // until shortURL's value cannot be found in urlDatabase
-  let str = randomStr.get();
+  let str = randomStr.generateRandomString();
   if (urlDatabase[str]) {
     while (urlDatabase[str]) {
-      str = randomStr.get();
+      str = randomStr.generateRandomString();
     }
   }
 
