@@ -59,6 +59,11 @@ server.post('/urls', (request, response) => {
   response.redirect('/urls/' + str);
 });
 
+server.post('/login', (request, response) => {
+  response.cookieParser('cookie', 'test');
+  response.redirect('/urls');
+});
+
 server.get('/urls/new', (request, response) => {
   response.render('urls_new');
 });
