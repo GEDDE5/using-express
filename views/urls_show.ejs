@@ -1,13 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <title>TinyApp</title>
-</head>
-<body>
-  <% if(urls.hasOwnProperty(shortURL)) { %>
-    <p><%= shortURL %>: <%= urls[shortURL] %></p>
-  <% } else { %>
-    <p>Shortened URL not found</p>
-  <% } %>
-</body>
-</html>
+<%- include partials/_header %>
+    <table class="table table-striped">
+      <tr>
+        <td>&nbsp;</td>
+        <td>
+          <h4>Short URL: <a href="<%= urls[shortURL] %>">http://localhost/u/<%= shortURL %></a></h4>
+        </td>
+        <td><h4>Long URL: <%= urls[shortURL] %></h4></td>
+        <td>&nbsp;</td>
+      </tr>
+    <% if(urls.hasOwnProperty(shortURL)) { %>
+    <% } else { %>
+      <p>Shortened URL not found</p>
+    <% } %>
+<%- include partials/_footer %>

@@ -1,15 +1,29 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <title>TinyApp</title>
-</head>
-<body>
 <%- include partials/_header %>
-<a href="/shorten">Shorten</a> a new URL
-<ol>
-<% Object.keys(urls).forEach(k => { %>
-  <li><%= k %>: <%= urls[k] %></li>
-<% }) %>
-</ol>
-</body>
-</html>
+<table class="table table-striped">
+  <tr>
+    <td>&nbsp;</td>
+    <td class="cleafix"><h4>Short URL</h4></td>
+    <td><h4>Long URL</h4></td>
+    <td>&nbsp;</td>
+  </tr>
+  <% Object.keys(urls).forEach((k, i) => { %>
+  <tr>
+    <td><%= i + 1 %></td>
+    <td><a href="/u/<%= k %>">http://localhost:8080/u/<%= k %></a></td>
+    <td>
+      <form class="form-inline" method="POST" id="edit" action="/urls/<%= k %>/edit">
+        <%= urls[k] %>
+        <button class="btn btn-default btn-xs" form="edit" type="submit">
+          Update
+        </button>
+      </form>
+    </td>
+    <td>
+      <form class="form-inline" method="POST" id="delete" action="/urls/<%= k %>/delete">
+        <button class="btn btn-default btn-xs" form="delete" type="submit">x</button>
+      </form>
+    </td>
+  </tr>
+  <% }) %>
+</table>
+<%- include partials/_footer %>
