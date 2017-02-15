@@ -60,7 +60,8 @@ server.post('/urls', (request, response) => {
 });
 
 server.post('/login', (request, response) => {
-  response.cookieParser('cookie', 'test');
+  username = request.body['username'];
+  response.cookie('username', username);
   response.redirect('/urls');
 });
 
