@@ -60,6 +60,10 @@ server.post('/urls', (request, response) => {
   response.redirect('/urls/' + str);
 });
 
+server.get('/register', (request, response) => {
+  response.render('urls_register');
+});
+
 server.post('/login', (request, response) => {
   let username = request.body['username'];
   response.cookie('username', username);
