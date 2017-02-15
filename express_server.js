@@ -4,15 +4,19 @@ const bodyParser = require("body-parser");
 const PORT = process.env.PORT || 8080;
 const randomStr = require('./make-shorturl');
 
-server.use(express.static('public'));
-server.use(bodyParser.urlencoded({ extended: true }));
 server.set("view engine", "ejs");
 
+// Middlewares
+server.use(express.static('public'));
+server.use(bodyParser.urlencoded({ extended: true }));
+
+// Database
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
 
+// Routes
 server.get('/urls', (request, response) => {
   response.render('urls_index', { urls: urlDatabase });
 });
@@ -28,18 +32,22 @@ server.post('/urls', (request, response) => {
   }
   // if submitted URL does not include http://, prepend
   // it to longURL and save it to urlDatabase
-  let longURL = request.body['longURL'];
-  let scheme='http://';
-  if (!request.body['longURL'].includes('http://')) {
-    longURL = scheme + longURL;
-  }
-  // Adds a new key-value pair, ie. shortURL: longURL
+  let longURL = toHTTP(request.body['longURL']);
+
+  // Pushes a new key-value pair, ie. shortURL: longURL
   urlDatabase[str] = longURL;
   response.redirect('/urls/' + str);
 });
 
 server.get('/urls/new', (request, response) => {
   response.render('urls_new');
+});
+
+server.post('/urls/:id', (request, response) => {
+  let updatedURL = toHTTP(request.body['updatedURL']);
+  urlDatabase[request.params.id] = updatedURL;
+  console.log(urlDatabase);
+  response.redirect('/urls/' + request.params.id);
 });
 
 server.get('/urls/:id', (request, response) => {
@@ -55,7 +63,7 @@ server.post('/urls/:id/delete', (request, response) => {
 server.get('/u/:shortURL', (request, response) => {
   let shortURL = request.params.shortURL;
   if(!urlDatabase[shortURL]) {
-    response.redirect('/urls');
+    response.redirect(404, '/urls');
   }
   let longURL = urlDatabase[shortURL];
   response.redirect(longURL);
@@ -64,3 +72,13 @@ server.get('/u/:shortURL', (request, response) => {
 server.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+function toHTTP(str) {
+  if(str) {
+    let scheme='http://';
+    if (!str.includes(scheme)) {
+      str = scheme + str;
+    }
+    return str;
+  }
+}
