@@ -39,7 +39,8 @@ function toHTTP(str) {
 ////////////////////
 
 server.get('/urls', (request, response) => {
-  response.render('urls_index', { urls: urlDatabase });
+  let templateVars = { username: request.cookies['username'], urls: urlDatabase };
+  response.render('urls_index', templateVars);
 });
 
 server.post('/urls', (request, response) => {
@@ -60,13 +61,13 @@ server.post('/urls', (request, response) => {
 });
 
 server.post('/login', (request, response) => {
-  username = request.body['username'];
+  let username = request.body['username'];
   response.cookie('username', username);
   response.redirect('/urls');
 });
 
 server.get('/urls/new', (request, response) => {
-  response.render('urls_new');
+  response.render('urls_new', { username: request.cookies['username'] });
 });
 
 server.post('/urls/:id', (request, response) => {
@@ -77,7 +78,11 @@ server.post('/urls/:id', (request, response) => {
 });
 
 server.get('/urls/:id', (request, response) => {
-  let templateVars = { shortURL: request.params.id, urls: urlDatabase };
+  let templateVars = {
+    shortURL: request.params.id,
+    urls: urlDatabase,
+    username: request.cookies['username']
+  };
   response.render('urls_show', templateVars);
 });
 
