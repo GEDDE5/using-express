@@ -1,14 +1,19 @@
 const express = require('express');
-server = express();
 const bodyParser = require("body-parser");
-const PORT = process.env.PORT || 8080;
 const randomStr = require('./make-shorturl');
 
+const server = express();
+const PORT = process.env.PORT || 8080;
+
 server.set("view engine", "ejs");
+
+
 
 // Middlewares
 server.use(express.static('public'));
 server.use(bodyParser.urlencoded({ extended: true }));
+
+
 
 // Database
 const urlDatabase = {
@@ -16,7 +21,22 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-// Routes
+// Helper functions
+function toHTTP(str) {
+  if(str) {
+    let scheme='http://';
+    if (!str.includes(scheme)) {
+      str = scheme + str;
+    }
+    return str;
+  }
+}
+
+
+////////////////////
+// TinyApp Routes //
+////////////////////
+
 server.get('/urls', (request, response) => {
   response.render('urls_index', { urls: urlDatabase });
 });
@@ -30,8 +50,7 @@ server.post('/urls', (request, response) => {
       str = randomStr.get();
     }
   }
-  // if submitted URL does not include http://, prepend
-  // it to longURL and save it to urlDatabase
+
   let longURL = toHTTP(request.body['longURL']);
 
   // Pushes a new key-value pair, ie. shortURL: longURL
@@ -55,11 +74,6 @@ server.get('/urls/:id', (request, response) => {
   response.render('urls_show', templateVars);
 });
 
-server.post('/urls/:id/delete', (request, response) => {
-  delete urlDatabase[request.params.id];
-  response.redirect('/urls');
-});
-
 server.get('/u/:shortURL', (request, response) => {
   let shortURL = request.params.shortURL;
   if(!urlDatabase[shortURL]) {
@@ -69,16 +83,11 @@ server.get('/u/:shortURL', (request, response) => {
   response.redirect(longURL);
 });
 
+server.post('/urls/:id/delete', (request, response) => {
+  delete urlDatabase[request.params.id];
+  response.redirect('/urls');
+});
+
 server.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
-
-function toHTTP(str) {
-  if(str) {
-    let scheme='http://';
-    if (!str.includes(scheme)) {
-      str = scheme + str;
-    }
-    return str;
-  }
-}
