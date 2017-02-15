@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require("body-parser");
 const randomStr = require('./make-shorturl');
 const cookieParser = require('cookie-parser')
+const morgan = require('morgan');
 
 const server = express();
 const PORT = process.env.PORT || 8080;
@@ -14,6 +15,7 @@ server.set("view engine", "ejs");
 server.use(express.static('public'));
 server.use(bodyParser.urlencoded({ extended: true }));
 server.use(cookieParser());
+server.use(morgan('dev'));
 
 
 // Database
