@@ -150,7 +150,8 @@ server.post('/logout', (request, response) => {
 // new shortURL route
 
 server.get('/urls/new', (request, response) => {
-  response.render('urls_new', { users: users, user: request.cookies['user_id'] });
+  let templateVars = { users: users, user: request.cookies['user_id'] };
+  response.render('urls_new', templateVars);
 });
 
 
@@ -169,7 +170,7 @@ server.get('/urls/:id', (request, response) => {
     shortURL: request.params.id,
     urls: urlDatabase,
     users: users,
-    user: request.cookies.user_id
+    user: request.cookies['user_id']
   };
   response.render('urls_show', templateVars);
 });
