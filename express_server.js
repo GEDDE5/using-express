@@ -45,6 +45,7 @@ function toHTTP(str) {
 }
 
 
+
 ////////////////////
 // TinyApp Routes //
 ////////////////////
@@ -103,20 +104,20 @@ server.post('/register', (request, response) => {
     }
   });
   // Verifies new user_id isn't already in users DB
-  let userId = generateRandomString();
-  if(users[userId]) {
-    while(users[userId]) {
-      users[userId] = generateRandomString();
+  let userID = generateRandomString();
+  if(users[userID]) {
+    while(users[userID]) {
+      users[userID] = generateRandomString();
     }
   } else {
-    users[userId] = userId;
+    users[userID] = userID;
   }
-  users[userId] = {
-    id: userId,
+  users[userID] = {
+    id: userID,
     email: request.body['email'],
     password: request.body['password']
   };
-  response.cookie('user_id', userId);
+  response.cookie('user_id', userID);
   response.redirect('/urls');
 });
 
@@ -167,10 +168,13 @@ server.get('/urls/new', (request, response) => {
 // :shortURL routes
 
 server.post('/urls/:id', (request, response) => {
-  let updatedURL = toHTTP(request.body['updatedURL']);
-  urlDatabase[request.params.id] = updatedURL;
-  console.log(urlDatabase);
-  response.redirect('/urls/' + request.params.id);
+  let user_id = request.cookies.user_id;
+  if(urlDatabase[request.params.id]['userID'] === user_id) {
+    let updatedURL = toHTTP(request.body['updatedURL']);
+    urlDatabase[request.params.id]['longURL'] = updatedURL;
+    response.redirect('/urls/' + request.params.id);
+  }
+  response.send(400, 'Not authorized to modify link');
 });
 
 server.get('/urls/:id', (request, response) => {
@@ -200,8 +204,13 @@ server.get('/u/:shortURL', (request, response) => {
 // delete shortURL route
 
 server.post('/urls/:id/delete', (request, response) => {
-  delete urlDatabase[request.params.id];
-  response.redirect('/urls');
+  let userID = request.cookies.user_id;
+  let urlID = request.params.id;
+  if(urlDatabase[urlID]['userID'] === userID) {
+    delete urlDatabase[urlID];
+    response.redirect('/urls');
+  }
+  response.send(401, 'Error: Not authorized to delete link');
 });
 
 
