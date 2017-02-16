@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require("body-parser");
-const cookieParser = require('cookie-parser')
+const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 
 const server = express();
@@ -22,9 +22,7 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
-const users = {
-
-}
+const users = {};
 
 // Helper functions
 function generateRandomString() {
@@ -39,11 +37,12 @@ function generateRandomString() {
 
 function toHTTP(str) {
   if(str) {
-    let scheme='http://';
-    if (!str.includes(scheme)) {
-      str = scheme + str;
+    let output = '';
+    let scheme = 'http://';
+    if(!str.includes(scheme)) {
+      output = scheme + str;
     }
-    return str;
+    return output;
   }
 }
 
@@ -57,7 +56,7 @@ server.get('/urls', (request, response) => {
     urls: urlDatabase,
     users: users,
     user: request.cookies.user_id
-  }
+  };
   console.log(templateVars);
   response.render('urls_index', templateVars);
 });
@@ -87,34 +86,43 @@ server.post('/register', (request, response) => {
   if(!request.body['email'] || !request.body['password']) {
     response.send(400, 'Error: Email address and/or password were empty');
   }
-  // Verifies user_id isn't already in users DB
-  let user_id = generateRandomString();
-  if(users[user_id]) {
-    while(users[user_id]) {
-      users[user_id] = generateRandomString();
-    }
-  } else {
-    users[user_id];
-  }
-
-  for(id in users) {
+  Object.keys(users).forEach(id => {
     if(users[id]['email'] === request.body['email']) {
       response.send(400, 'Error: Email address already in use');
     }
+  });
+  // Verifies new user_id isn't already in users DB
+  let userId = generateRandomString();
+  if(users[userId]) {
+    while(users[userId]) {
+      users[userId] = generateRandomString();
+    }
+  } else {
+    users[userId] = userId;
   }
-
-  users[user_id] = {
-    id: user_id,
+  users[userId] = {
+    id: userId,
     email: request.body['email'],
     password: request.body['password']
-  }
-
-  response.cookie('user_id', user_id);
+  };
+  response.cookie('user_id', userId);
   response.redirect('/urls');
 });
 
+server.get('/login', (request, response) => {
+  response.render('urls_login');
+});
+
 server.post('/login', (request, response) => {
-  response.redirect('/urls');
+  // Checks against DB to verify user credentials
+  Object.keys(users).forEach(id => {
+    console.log(users[id]['email']);
+    if(users[id]['email'] === request.body['email'] && users[id]['password'] === request.body['password']) {
+      response.cookie('user_id', users[id]['id']);
+      response.redirect('/urls');
+    }
+  });
+  response.send(403, 'Error: Login credentials cannot be found in database');
 });
 
 server.post('/logout', (request, response) => {
