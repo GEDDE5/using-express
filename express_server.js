@@ -57,6 +57,16 @@ function isLoggedIn(req) {
   return false;
 }
 
+function urlsForUser(id) {
+  let userUrls = []
+  Object.keys(urlDatabase).forEach((u, i) => {
+    if(urlDatabase[u].userID === id) {
+      userUrls.push( { urlID: u, url: urlDatabase[u].longURL } );
+    }
+  })
+
+  return userUrls;
+}
 
 ////////////////////
 // TinyApp Routes //
@@ -70,9 +80,14 @@ server.get('/urls', (request, response) => {
   let templateVars = {
     urls: urlDatabase,
     users: users,
-    user: request.cookies.user_id
+    user: request.cookies.user_id,
+    loggedIn: false
   };
-  console.log(templateVars);
+  if(isLoggedIn(request)) {
+    templateVars['loggedIn'] = true;
+    templateVars['userUrls'] = urlsForUser(request.cookies.user_id);
+    console.log(templateVars);
+  }
   response.render('urls_index', templateVars);
 });
 
@@ -94,7 +109,6 @@ server.post('/urls', (request, response) => {
     longURL: longURL,
     userID: userID
   }
-  console.log(urlDatabase);
   response.redirect('/urls/' + str);
 });
 
@@ -207,7 +221,7 @@ server.get('/u/:shortURL', (request, response) => {
   if(!urlDatabase[shortURL]) {
     response.redirect(404, '/urls');
   }
-  let longURL = urlDatabase[shortURL];
+  let longURL = urlDatabase[shortURL].longURL;
   response.redirect(longURL);
 });
 

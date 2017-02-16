@@ -2,28 +2,34 @@
 <table class="table table-striped">
   <tr>
     <td>&nbsp;</td>
-    <td class="cleafix"><h4>Short URL</h4></td>
+    <td><h4>Short URL</h4></td>
     <td><h4>Long URL</h4></td>
     <td>&nbsp;</td>
   </tr>
-  <% Object.keys(urls).forEach((k, i) => { %>
-  <tr>
-    <td><%= i + 1 %></td>
-    <td><a href="/u/<%= k %>">http://localhost:8080/u/<%= k %></a></td>
-    <td>
-      <form class="form-inline" method="GET" id="update" action="/urls/<%= k %>">
-        <label for="update"><%= urls[k]['longURL'] %></label>
-        <button id="update" class="btn btn-default btn-xs" type="submit">
-          Update
-        </button>
-      </form>
-    </td>
-    <td>
-      <form class="form-inline" method="POST" id="delete" action="/urls/<%= k %>/delete">
-        <button class="btn btn-default btn-xs" id="delete" type="submit">x</button>
-      </form>
-    </td>
-  </tr>
-  <% }); %>
+  <% if(loggedIn) { %>
+    <% userUrls.forEach((k, i) => { %>
+    <tr>
+      <td><%= i + 1 %></td>
+      <td><a href="/u/<%= k %>">http://localhost:8080/u/<%= k.urlID %></a></td>
+      <td>
+        <form class="form-inline" method="GET" id="update" action="/urls/<%= k.urlID %>">
+          <label for="update"><%= k.url %></label>
+          <button id="update" class="btn btn-default btn-xs" type="submit">
+            Update
+          </button>
+        </form>
+      </td>
+      <td>
+        <form class="form-inline" method="POST" id="delete" action="/urls/<%= k.urlID %>/delete">
+          <button class="btn btn-default btn-xs" id="delete" type="submit">x</button>
+        </form>
+      </td>
+    </tr>
+    <% }); %>
+  <% } else { %>
+    <td>&nbsp;</td>
+    <td>Please login (or register) to view shortened URLs</td>
+    <td>&nbsp;</td>
+  <% } %>
 </table>
 <%- include partials/_footer %>
