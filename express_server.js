@@ -17,11 +17,14 @@ server.use(cookieParser());
 server.use(morgan('dev'));
 
 
-// Database
+// Databases
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+const users = {
+
+}
 
 // Helper functions
 function generateRandomString() {
@@ -73,6 +76,35 @@ server.post('/urls', (request, response) => {
 
 server.get('/register', (request, response) => {
   response.render('urls_register');
+});
+
+server.post('/register', (request, response) => {
+  //
+  if(!request.body['email'] || !request.body['password']) {
+    response.send(400, 'Error: Email address and/or password were empty');
+  }
+  // Verifies user_id isn't already in users DB
+  let user_id = generateRandomString();
+  if(users[user_id]) {
+    while(users[user_id]) {
+      users[user_id] = generateRandomString();
+    }
+  } else {
+    users[user_id];
+  }
+
+  for(id in users) {
+    if(users[id]['email'] === request.body['email']) {
+      response.send(400, 'Error: Email address already in use');
+    }
+  }
+  users[user_id] = {
+    id: user_id,
+    email: request.body['email'],
+    password: request.body['password']
+  }
+  response.cookie('user_id', user_id);
+  response.redirect('/urls');
 });
 
 server.post('/login', (request, response) => {
