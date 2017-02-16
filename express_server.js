@@ -150,6 +150,10 @@ server.post('/logout', (request, response) => {
 // new shortURL route
 
 server.get('/urls/new', (request, response) => {
+  if(!request.cookies['user_id']) {
+    response.redirect('/login');
+  }
+  console.log(request.cookies['user_id']);
   let templateVars = { users: users, user: request.cookies['user_id'] };
   response.render('urls_new', templateVars);
 });
