@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 const bcrypt = require('bcrypt');
+const cookieSession = require('cookie-session');
 
 const server = express();
 const PORT = process.env.PORT || 8080;
@@ -15,7 +16,11 @@ server.use(express.static('public'));
 server.use(bodyParser.urlencoded({ extended: true }));
 server.use(cookieParser());
 server.use(morgan('dev'));
-
+server.use(cookieSession({
+  name: 'session',
+  keys: [process.env.SECRET_KEY || 'developer'],
+  maxAge: 1000 * 60 * 60 * 24
+}))
 
 // Databases
 const urlDatabase = {
