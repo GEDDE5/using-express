@@ -9,7 +9,6 @@ const PORT = process.env.PORT || 8080;
 server.set("view engine", "ejs");
 
 
-
 // Middlewares
 server.use(express.static('public'));
 server.use(bodyParser.urlencoded({ extended: true }));
@@ -51,6 +50,10 @@ function toHTTP(str) {
 // TinyApp Routes //
 ////////////////////
 
+
+
+// urls route
+
 server.get('/urls', (request, response) => {
   let templateVars = {
     urls: urlDatabase,
@@ -77,6 +80,10 @@ server.post('/urls', (request, response) => {
   urlDatabase[str] = longURL;
   response.redirect('/urls/' + str);
 });
+
+
+
+// register routes
 
 server.get('/register', (request, response) => {
   response.render('urls_register');
@@ -109,6 +116,10 @@ server.post('/register', (request, response) => {
   response.redirect('/urls');
 });
 
+
+
+// login routes
+
 server.get('/login', (request, response) => {
   response.render('urls_login');
 });
@@ -125,14 +136,26 @@ server.post('/login', (request, response) => {
   response.send(403, 'Error: Login credentials cannot be found in database');
 });
 
+
+
+// logout route
+
 server.post('/logout', (request, response) => {
   response.clearCookie('user_id');
   response.redirect('/urls');
 });
 
+
+
+// new shortURL route
+
 server.get('/urls/new', (request, response) => {
   response.render('urls_new', { users: users, user: request.cookies['user_id'] });
 });
+
+
+
+// :shortURL routes
 
 server.post('/urls/:id', (request, response) => {
   let updatedURL = toHTTP(request.body['updatedURL']);
@@ -151,6 +174,9 @@ server.get('/urls/:id', (request, response) => {
   response.render('urls_show', templateVars);
 });
 
+
+// remote :longURL route
+
 server.get('/u/:shortURL', (request, response) => {
   let shortURL = request.params.shortURL;
   if(!urlDatabase[shortURL]) {
@@ -160,10 +186,16 @@ server.get('/u/:shortURL', (request, response) => {
   response.redirect(longURL);
 });
 
+
+
+// delete shortURL route
+
 server.post('/urls/:id/delete', (request, response) => {
   delete urlDatabase[request.params.id];
   response.redirect('/urls');
 });
+
+
 
 server.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
