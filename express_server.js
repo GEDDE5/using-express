@@ -53,17 +53,22 @@ function toHTTP(str) {
 ////////////////////
 
 server.get('/urls', (request, response) => {
-  let templateVars = { username: request.cookies['username'], urls: urlDatabase };
+  let templateVars = {
+    urls: urlDatabase,
+    users: users,
+    user: request.cookies.user_id
+  }
+  console.log(templateVars);
   response.render('urls_index', templateVars);
 });
 
 server.post('/urls', (request, response) => {
   // if shortURL alreadys exists in database, generate one
   // until shortURL's value cannot be found in urlDatabase
-  let str = randomStr.generateRandomString();
+  let str = generateRandomString();
   if (urlDatabase[str]) {
     while (urlDatabase[str]) {
-      str = randomStr.generateRandomString();
+      str = generateRandomString();
     }
   }
 
@@ -79,7 +84,6 @@ server.get('/register', (request, response) => {
 });
 
 server.post('/register', (request, response) => {
-  //
   if(!request.body['email'] || !request.body['password']) {
     response.send(400, 'Error: Email address and/or password were empty');
   }
@@ -98,28 +102,28 @@ server.post('/register', (request, response) => {
       response.send(400, 'Error: Email address already in use');
     }
   }
+
   users[user_id] = {
     id: user_id,
     email: request.body['email'],
     password: request.body['password']
   }
+
   response.cookie('user_id', user_id);
   response.redirect('/urls');
 });
 
 server.post('/login', (request, response) => {
-  let username = request.body['username'];
-  response.cookie('username', username);
   response.redirect('/urls');
 });
 
 server.post('/logout', (request, response) => {
-  response.clearCookie('username');
+  response.clearCookie('user_id');
   response.redirect('/urls');
 });
 
 server.get('/urls/new', (request, response) => {
-  response.render('urls_new', { username: request.cookies['username'] });
+  response.render('urls_new', { users: users, user: request.cookies['user_id'] });
 });
 
 server.post('/urls/:id', (request, response) => {
@@ -133,7 +137,8 @@ server.get('/urls/:id', (request, response) => {
   let templateVars = {
     shortURL: request.params.id,
     urls: urlDatabase,
-    username: request.cookies['username']
+    users: users,
+    user: request.cookies.user_id
   };
   response.render('urls_show', templateVars);
 });
