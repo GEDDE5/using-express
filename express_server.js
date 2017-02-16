@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
+const bcrypt = require('bcrypt');
 
 const server = express();
 const PORT = process.env.PORT || 8080;
@@ -67,6 +68,8 @@ function urlsForUser(id) {
 
   return userUrls;
 }
+
+
 
 ////////////////////
 // TinyApp Routes //
@@ -138,10 +141,12 @@ server.post('/register', (request, response) => {
   } else {
     users[userID] = userID;
   }
+  const email = request.body['email'];
+  const password = bcrypt.hashSync(request.body['password'], 10);
   users[userID] = {
     id: userID,
-    email: request.body['email'],
-    password: request.body['password']
+    email: email,
+    password: password
   };
   response.cookie('user_id', userID);
   response.redirect('/urls');
@@ -159,9 +164,12 @@ server.post('/login', (request, response) => {
   // Checks against DB to verify user credentials
   Object.keys(users).forEach(id => {
     console.log(users[id]['email']);
-    if(users[id]['email'] === request.body['email'] && users[id]['password'] === request.body['password']) {
-      response.cookie('user_id', users[id]['id']);
-      response.redirect('/urls');
+    if(users[id]['email'] === request.body['email']) {
+      if(bcrypt.compareSync(request.body['password'], users[id]['password'])) {
+        response.cookie('user_id', users[id]['id']);
+        response.redirect('/urls');
+        return;
+      }
     }
   });
   response.send(403, 'Error: Login credentials cannot be found in database');
