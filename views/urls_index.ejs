@@ -12,7 +12,7 @@
     <td><a href="/u/<%= k %>">http://localhost:8080/u/<%= k %></a></td>
     <td>
       <form class="form-inline" method="GET" id="update" action="/urls/<%= k %>">
-        <label for="update"><%= urls[k] %></label>
+        <label for="update"><%= urls[k]['longURL'] %></label>
         <button id="update" class="btn btn-default btn-xs" type="submit">
           Update
         </button>

@@ -18,8 +18,7 @@ server.use(morgan('dev'));
 
 // Databases
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  'b2xVn2': { longURL: 'http://www.lighthouselabs.ca', userID: 'lhl' }
 };
 const users = {};
 
@@ -64,8 +63,10 @@ server.get('/urls', (request, response) => {
   response.render('urls_index', templateVars);
 });
 
+// post received from /urls/new
+
 server.post('/urls', (request, response) => {
-  // if shortURL alreadys exists in database, generate one
+  // if shortURL alreadys exists in database, generate another
   // until shortURL's value cannot be found in urlDatabase
   let str = generateRandomString();
   if (urlDatabase[str]) {
@@ -75,9 +76,12 @@ server.post('/urls', (request, response) => {
   }
 
   let longURL = toHTTP(request.body['longURL']);
-
-  // Pushes a new key-value pair, ie. shortURL: longURL
-  urlDatabase[str] = longURL;
+  let userID = request.cookies.user_id;
+  urlDatabase[str] = {
+    longURL: longURL,
+    userID: userID
+  }
+  console.log(urlDatabase);
   response.redirect('/urls/' + str);
 });
 
