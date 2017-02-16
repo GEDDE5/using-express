@@ -44,6 +44,18 @@ function toHTTP(str) {
   }
 }
 
+function isLoggedIn(req) {
+  // must use for...in instead of Object.keys().forEach() because
+  // forEach is impervious against breaking loop before completion
+  if(req.cookies.user_id) {
+    for(let u in users) {
+      if(users[u]['id'] === req.cookies.user_id) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
 
 
 ////////////////////
@@ -204,11 +216,14 @@ server.get('/u/:shortURL', (request, response) => {
 // delete shortURL route
 
 server.post('/urls/:id/delete', (request, response) => {
-  let userID = request.cookies.user_id;
-  let urlID = request.params.id;
-  if(urlDatabase[urlID]['userID'] === userID) {
-    delete urlDatabase[urlID];
-    response.redirect('/urls');
+  if(isLoggedIn(request)) {
+    let userID = request.cookies.user_id;
+    let urlID = request.params.id;
+    if(urlDatabase[urlID]['userID'] === userID) {
+      delete urlDatabase[urlID];
+      response.redirect('/urls');
+      return;
+    }
   }
   response.send(401, 'Error: Not authorized to delete link');
 });
