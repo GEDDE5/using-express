@@ -18,8 +18,7 @@ server.use(cookieParser());
 server.use(morgan('dev'));
 server.use(cookieSession({
   name: 'session',
-  keys: [process.env.SECRET_KEY || 'developer'],
-  maxAge: 1000 * 60 * 60 * 24
+  keys: [process.env.SECRET_KEY || 'developer']
 }))
 
 // Databases
@@ -53,9 +52,9 @@ function toHTTP(str) {
 function isLoggedIn(req) {
   // must use for...in instead of Object.keys().forEach() because
   // forEach is impervious against breaking loop before completion
-  if(req.cookies.user_id) {
+  if(req.session.user_id) {
     for(let u in users) {
-      if(users[u]['id'] === req.cookies.user_id) {
+      if(users[u]['id'] === req.session.user_id) {
         return true;
       }
     }
@@ -84,24 +83,23 @@ function urlsForUser(id) {
 
 // urls route
 
-server.get('/urls', (request, response) => {
+server.get('/urls', (req, res) => {
   let templateVars = {
     urls: urlDatabase,
     users: users,
-    user: request.cookies.user_id,
+    user: req.session.user_id,
     loggedIn: false
   };
-  if(isLoggedIn(request)) {
+  if(isLoggedIn(req)) {
     templateVars['loggedIn'] = true;
-    templateVars['userUrls'] = urlsForUser(request.cookies.user_id);
-    console.log(templateVars);
+    templateVars['userUrls'] = urlsForUser(req.session.user_id);
   }
-  response.render('urls_index', templateVars);
+  res.render('urls_index', templateVars);
 });
 
 // post received from /urls/new
 
-server.post('/urls', (request, response) => {
+server.post('/urls', (req, res) => {
   // if shortURL alreadys exists in database, generate another
   // until shortURL's value cannot be found in urlDatabase
   let str = generateRandomString();
@@ -111,30 +109,30 @@ server.post('/urls', (request, response) => {
     }
   }
 
-  let longURL = toHTTP(request.body['longURL']);
-  let userID = request.cookies.user_id;
+  let longURL = toHTTP(req.body['longURL']);
+  let userID = req.session.user_id;
   urlDatabase[str] = {
     longURL: longURL,
     userID: userID
   }
-  response.redirect('/urls/' + str);
+  res.redirect('/urls/' + str);
 });
 
 
 
 // register routes
 
-server.get('/register', (request, response) => {
-  response.render('urls_register');
+server.get('/register', (req, res) => {
+  res.render('urls_register');
 });
 
-server.post('/register', (request, response) => {
-  if(!request.body['email'] || !request.body['password']) {
-    response.send(400, 'Error: Email address and/or password were empty');
+server.post('/register', (req, res) => {
+  if(!req.body['email'] || !req.body['password']) {
+    res.send(400, 'Error: Email address and/or password were empty');
   }
   Object.keys(users).forEach(id => {
-    if(users[id]['email'] === request.body['email']) {
-      response.send(400, 'Error: Email address already in use');
+    if(users[id]['email'] === req.body['email']) {
+      res.send(400, 'Error: Email address already in use');
     }
   });
   // Verifies new user_id isn't already in users DB
@@ -146,113 +144,111 @@ server.post('/register', (request, response) => {
   } else {
     users[userID] = userID;
   }
-  const email = request.body['email'];
-  const password = bcrypt.hashSync(request.body['password'], 10);
+  const email = req.body['email'];
+  const password = bcrypt.hashSync(req.body['password'], 10);
   users[userID] = {
     id: userID,
     email: email,
     password: password
   };
-  response.cookie('user_id', userID);
-  response.redirect('/urls');
+  req.session.user_id = userID;
+  res.redirect('/urls');
 });
 
 
 
 // login routes
 
-server.get('/login', (request, response) => {
-  response.render('urls_login');
+server.get('/login', (req, res) => {
+  res.render('urls_login');
 });
 
-server.post('/login', (request, response) => {
+server.post('/login', (req, res) => {
   // Checks against DB to verify user credentials
   Object.keys(users).forEach(id => {
-    console.log(users[id]['email']);
-    if(users[id]['email'] === request.body['email']) {
-      if(bcrypt.compareSync(request.body['password'], users[id]['password'])) {
-        response.cookie('user_id', users[id]['id']);
-        response.redirect('/urls');
+    if(users[id]['email'] === req.body['email']) {
+      if(bcrypt.compareSync(req.body['password'], users[id]['password'])) {
+        req.session.user_id = users[id]['id'];
+        res.redirect('/urls');
         return;
       }
     }
   });
-  response.send(403, 'Error: Login credentials cannot be found in database');
+  res.send(403, 'Error: Login credentials cannot be found in database');
 });
 
 
 
 // logout route
 
-server.post('/logout', (request, response) => {
-  response.clearCookie('user_id');
-  response.redirect('/urls');
+server.post('/logout', (req, res) => {
+  delete req.session.user_id;
+  res.redirect('/urls');
 });
 
 
 
 // new shortURL route
 
-server.get('/urls/new', (request, response) => {
-  if(!request.cookies['user_id']) {
-    response.redirect('/login');
+server.get('/urls/new', (req, res) => {
+  if(!req.session.user_id) {
+    res.redirect('/login');
   }
-  console.log(request.cookies['user_id']);
-  let templateVars = { users: users, user: request.cookies['user_id'] };
-  response.render('urls_new', templateVars);
+  console.log(req.session.user_id);
+  let templateVars = { users: users, user: req.session.user_id };
+  res.render('urls_new', templateVars);
 });
 
 
 
 // :shortURL routes
 
-server.post('/urls/:id', (request, response) => {
-  let user_id = request.cookies.user_id;
-  if(urlDatabase[request.params.id]['userID'] === user_id) {
-    let updatedURL = toHTTP(request.body['updatedURL']);
-    urlDatabase[request.params.id]['longURL'] = updatedURL;
-    response.redirect('/urls/' + request.params.id);
+server.post('/urls/:id', (req, res) => {
+  let user_id = req.session.user_id;
+  if(urlDatabase[req.params.id]['userID'] === user_id) {
+    let updatedURL = toHTTP(req.body['updatedURL']);
+    urlDatabase[req.params.id]['longURL'] = updatedURL;
+    res.redirect('/urls/' + req.params.id);
   }
-  response.send(400, 'Not authorized to modify link');
+  res.send(400, 'Not authorized to modify link');
 });
 
-server.get('/urls/:id', (request, response) => {
+server.get('/urls/:id', (req, res) => {
   let templateVars = {
-    shortURL: request.params.id,
+    shortURL: req.params.id,
     urls: urlDatabase,
     users: users,
-    user: request.cookies['user_id']
+    user: req.session.user_id
   };
-  response.render('urls_show', templateVars);
+  res.render('urls_show', templateVars);
 });
 
 
 // remote :longURL route
 
-server.get('/u/:shortURL', (request, response) => {
-  let shortURL = request.params.shortURL;
+server.get('/u/:shortURL', (req, res) => {
+  let shortURL = req.params.shortURL;
   if(!urlDatabase[shortURL]) {
-    response.redirect(404, '/urls');
+    res.redirect(404, '/urls');
   }
   let longURL = urlDatabase[shortURL].longURL;
-  response.redirect(longURL);
+  res.redirect(longURL);
 });
 
 
 
 // delete shortURL route
 
-server.post('/urls/:id/delete', (request, response) => {
-  if(isLoggedIn(request)) {
-    let userID = request.cookies.user_id;
-    let urlID = request.params.id;
+server.post('/urls/:id/delete', (req, res) => {
+  if(isLoggedIn(req)) {
+    let userID = req.session.user_id;
+    let urlID = req.params.id;
     if(urlDatabase[urlID]['userID'] === userID) {
       delete urlDatabase[urlID];
-      response.redirect('/urls');
-      return;
+      res.redirect('/urls');
     }
   }
-  response.send(401, 'Error: Not authorized to delete link');
+  res.send(401, 'Error: Not authorized to delete link');
 });
 
 
