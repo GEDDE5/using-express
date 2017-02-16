@@ -1,13 +1,13 @@
 <%- include partials/_header %>
 <table class="table table-striped">
+  <% if(loggedIn) { %>
+    <% userUrls.forEach((k, i) => { %>
   <tr>
     <td>&nbsp;</td>
     <td><h4>Short URL</h4></td>
     <td><h4>Long URL</h4></td>
     <td>&nbsp;</td>
   </tr>
-  <% if(loggedIn) { %>
-    <% userUrls.forEach((k, i) => { %>
     <tr>
       <td><%= i + 1 %></td>
       <td><a href="/u/<%= k %>">http://localhost:8080/u/<%= k.urlID %></a></td>
@@ -28,7 +28,7 @@
     <% }); %>
   <% } else { %>
     <td>&nbsp;</td>
-    <td>Please login (or register) to view shortened URLs</td>
+    <td>Please <a href="/login">login</a> (or <a href="/register">register</a>) to continue</td>
     <td>&nbsp;</td>
   <% } %>
 </table>

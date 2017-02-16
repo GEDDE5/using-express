@@ -6,10 +6,9 @@ const bcrypt = require('bcrypt');
 const cookieSession = require('cookie-session');
 
 const server = express();
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 3000;
 
 server.set("view engine", "ejs");
-
 
 // Middlewares
 server.use(express.static('public'));
@@ -69,15 +68,24 @@ function urlsForUser(id) {
       userUrls.push( { urlID: u, url: urlDatabase[u].longURL } );
     }
   })
-
   return userUrls;
 }
-
 
 
 ////////////////////
 // TinyApp Routes //
 ////////////////////
+
+
+
+// root route
+
+server.get('/', (req, res) => {
+  if(isLoggedIn(req)) {
+    res.redirect('/urls');
+  }
+  res.redirect('/login');
+});
 
 
 
@@ -93,6 +101,8 @@ server.get('/urls', (req, res) => {
   if(isLoggedIn(req)) {
     templateVars['loggedIn'] = true;
     templateVars['userUrls'] = urlsForUser(req.session.user_id);
+  } else {
+    res.status(401);
   }
   res.render('urls_index', templateVars);
 });
@@ -120,7 +130,9 @@ server.post('/urls', (req, res) => {
 
 
 
-// register routes
+/**
+ *  /register route
+ */
 
 server.get('/register', (req, res) => {
   res.render('urls_register');
@@ -191,10 +203,11 @@ server.post('/logout', (req, res) => {
 // new shortURL route
 
 server.get('/urls/new', (req, res) => {
-  if(!req.session.user_id) {
-    res.redirect('/login');
+  if(!isLoggedIn(req)) {
+    res.status(401)
+    res.redirect('/urls');
+    return;
   }
-  console.log(req.session.user_id);
   let templateVars = { users: users, user: req.session.user_id };
   res.render('urls_new', templateVars);
 });
@@ -215,11 +228,25 @@ server.post('/urls/:id', (req, res) => {
 
 server.get('/urls/:id', (req, res) => {
   let templateVars = {
-    shortURL: req.params.id,
-    urls: urlDatabase,
-    users: users,
-    user: req.session.user_id
+  shortURL: req.params.id,
+  urls: urlDatabase,
+  users: users,
+  user: req.session.user_id,
+  errors: {}
   };
+  if(!urlDatabase.hasOwnProperty(req.params.id)) {
+    templateVars.errors.urlExists = false;
+    res.status(404).render('urls_show', templateVars);
+    return;
+  } else if(!isLoggedIn(req)) {
+      templateVars.errors.loggedIn = false;
+      res.status(401).render('urls_show', templateVars);
+      return;
+  } else if(urlDatabase[req.params.id].userID !== req.session.user_id) {
+      templateVars.errors.owner = false;
+      res.status(403).render('urls_show', templateVars);
+      return;
+  }
   res.render('urls_show', templateVars);
 });
 
