@@ -26,7 +26,9 @@ server.use(cookieSession({
 const urlDatabase = {
   'b2xVn2': { longURL: 'http://www.lighthouselabs.ca', userID: 'lhl' }
 };
+
 const users = {};
+
 const templateVars = {
   urls: urlDatabase,
   users: users,
@@ -60,7 +62,7 @@ function toHTTP(str) {
 function isLoggedIn(req) {
   // must use for...in instead of Object.keys().forEach() because
   // forEach is impervious* against breaking loop before completion
-  // ???
+  // *???
   if(req.session.user_id) {
     for(let u in users) {
       if(users[u]['id'] === req.session.user_id) {
@@ -112,12 +114,11 @@ server.get('/urls', (req, res) => {
     templateVars['userUrls'] = urlsForUser(req.session.user_id);
     res.render('urls_index', templateVars);
     return;
-  } else {
-    templateVars.error = 'Error: You must be logged in to access this page';
-    res.status(401).render('urls_index', templateVars);
-    templateVars.error = false;
-    return;
   }
+  templateVars.error = 'Error: You must be logged in to access this page';
+  res.status(401).render('urls_index', templateVars);
+  templateVars.error = false;
+  return;
 });
 
 
@@ -143,9 +144,9 @@ server.post('/urls', (req, res) => {
     let visits = {
       visits: 0,
       unique: 0,
-      ipAddr: req.connection.remoteaddress
+      ipAddr: []
     };
-
+    console.log(visits);
     urlDatabase[str] = {
       longURL: longURL,
       userID: userID,
@@ -154,7 +155,9 @@ server.post('/urls', (req, res) => {
     };
     res.redirect('/urls/' + str);
   }
-  res.status(401).send('Error: You must be logged in to access this page');
+  templateVars.error = 'Error: You must be logged in to access this page';
+  res.status(401).render('urls_index', templateVars);
+  templateVars.error = false;
 });
 
 
@@ -231,7 +234,7 @@ server.post('/login', (req, res) => {
     }
   });
   templateVars.error = 'Error: Login credentials do not match any in database';
-  res.status(401).render('urls', templateVars );
+  res.status(401).render('urls_index', templateVars );
   templateVars.error = false;
   return;
 });
@@ -314,9 +317,19 @@ server.get('/urls/:id', (req, res) => {
 server.get('/u/:shortURL', (req, res) => {
   let shortURL = req.params.shortURL;
   if(urlDatabase[shortURL]) {
-    if(req.connection.remoteaddress !== urlDatabase[shortURL].visits.ipaddr) {
+    console.log(urlDatabase[shortURL].visits.ipAddr.length);
+    if(urlDatabase[shortURL].visits.ipAddr.length === 0) {
+      urlDatabase[shortURL].visits.ipAddr.push(req.connection.remoteAddress);
       urlDatabase[shortURL].visits.unique++;
+    } else {
+      urlDatabase[shortURL].visits.ipAddr.forEach(ip => {
+        if(req.connection.remoteAddress !== ip) {
+          urlDatabase[shortURL].visits.ipAddr.push(req.connection.remoteAddress);
+          urlDatabase[shortURL].visits.unique++;
+        }
+      });
     }
+    console.log(urlDatabase[shortURL].visits);
     urlDatabase[shortURL].visits.visits++;
     console.log('visit +1');
     let longURL = urlDatabase[shortURL].longURL;
