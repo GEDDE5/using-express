@@ -15,7 +15,7 @@ npm install
 npm start
 ```
 
-### Usage
+### Use
 
 In browser:
 ```
