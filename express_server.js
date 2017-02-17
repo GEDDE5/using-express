@@ -131,6 +131,10 @@ server.post('/urls', (req, res) => {
     console.log(req.body);
     // if shortURL alreadys exists in database, generate another
     // until shortURL's value cannot be found in urlDatabase
+    if(!req.body['longURL']) {
+      sendError(400, res, 'Error: Please specify a URL to shorten');
+      return;
+    }
     let str = '';
     if(!req.body['custom']) {
       str = generateRandomString();
@@ -268,15 +272,17 @@ server.post('/urls/:id', (req, res) => {
     sendError(401, res, 'Error: You must be logged in to access this page');
     return;
   } else if(urlDatabase[req.params.id].userID !== req.session.user_id) {
-    sendError(403, res, 'Error: You do not have sufficient credentials to access this short URL')
+    sendError(403, res, 'Error: You do not have sufficient credentials to access this short URL');
     return;
   }
   if(req.body['updatedURL']) {
     let updatedURL = toHTTP(req.body['updatedURL']);
     urlDatabase[req.params.id]['longURL'] = updatedURL;
+    res.redirect('/urls/' + req.params.id);
+  } else {
+    sendError(400, res, 'Error: Please specify a URL to be updated');
+    return;
   }
-  res.redirect('/urls/' + req.params.id);
-  return;
 });
 
 server.get('/urls/:id', (req, res) => {
