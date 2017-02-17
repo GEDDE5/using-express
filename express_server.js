@@ -265,7 +265,7 @@ server.post('/urls/:id', (req, res) => {
     sendError(404, res, 'Error: This short URL does not yet exist');
     return;
   } else if(!isLoggedIn(req)) {
-    sendError(401, res, 'Error: You must be logged into access this page');
+    sendError(401, res, 'Error: You must be logged in to access this page');
     return;
   } else if(urlDatabase[req.params.id].userID !== req.session.user_id) {
     sendError(403, res, 'Error: You do not have sufficient credentials to access this short URL')
@@ -316,7 +316,7 @@ server.get('/u/:shortURL', (req, res) => {
     res.redirect(longURL);
     return;
   }
-  sendError(404, res, 'Error: This short URL has not yet been created');
+  sendError(404, res, 'Error: This short URL does not yet exist');
 });
 
 // delete shortURL route
