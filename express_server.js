@@ -10,6 +10,7 @@ const PORT = process.env.PORT || 3000;
 
 server.set("view engine", "ejs");
 
+
 // Middlewares
 server.use(express.static('public'));
 server.use(bodyParser.urlencoded({ extended: true }));
@@ -19,6 +20,7 @@ server.use(cookieSession({
   name: 'session',
   keys: [process.env.SECRET_KEY || 'developer']
 }))
+
 
 // Databases
 const urlDatabase = {
@@ -31,6 +33,7 @@ const templateVars = {
   user: '',
   error: ''
 }
+
 
 // Helper functions
 function generateRandomString() {
@@ -83,7 +86,6 @@ function urlsForUser(id) {
 ////////////////////
 
 
-
 // root route
 
 server.get('/', (req, res) => {
@@ -92,7 +94,6 @@ server.get('/', (req, res) => {
   }
   res.redirect('/login');
 });
-
 
 
 // urls route
@@ -111,6 +112,7 @@ server.get('/urls', (req, res) => {
     return;
   }
 });
+
 
 // post received from /urls/new
 
@@ -132,7 +134,6 @@ server.post('/urls', (req, res) => {
   }
   res.redirect('/urls/' + str);
 });
-
 
 
 // register route
@@ -181,7 +182,6 @@ server.post('/register', (req, res) => {
 });
 
 
-
 // login routes
 
 server.get('/login', (req, res) => {
@@ -216,14 +216,12 @@ server.post('/login', (req, res) => {
 });
 
 
-
 // logout route
 
 server.post('/logout', (req, res) => {
   delete req.session.user_id;
   res.redirect('/urls');
 });
-
 
 
 // new shortURL route
@@ -238,7 +236,6 @@ server.get('/urls/new', (req, res) => {
   }
   res.render('urls_new', templateVars);
 });
-
 
 
 // :shortURL routes
@@ -305,6 +302,7 @@ server.get('/u/:shortURL', (req, res) => {
   res.status(404).render('urls_index', templateVars);
   templateVars.error = false;
 });
+
 
 // delete shortURL route
 
