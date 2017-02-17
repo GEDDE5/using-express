@@ -8,13 +8,13 @@
     <td class="col-md-2">Date Created</td>
     <td class="col-md-4">Short URL</td>
     <td class="col-md-4">Long URL</td>
-    <td class="col-md-2">Visits</td>
+    <td class="col-md-2">Visits (Unique)</td>
     <td class="col-md-3">&nbsp;</td>
   </tr>
   <% userUrls.forEach((k, i) => { %>
     <tr>
       <td ><%= i + 1 %></td>
-      <td><a href="/u/<%= k.urlID %>">http://localhost:8080/u/<%= k.urlID %></a></td>
+      <td><a href="/u/<%= k.urlID %>">http://localhost/u/<%= k.urlID %></a></td>
       <td>
         <form class="form-inline" method="GET" id="update" action="/urls/<%= k.urlID %>">
           <label for="update"><%= k.url %></label>
