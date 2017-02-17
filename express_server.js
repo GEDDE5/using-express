@@ -48,7 +48,7 @@ function generateRandomString() {
 
 function toHTTP(str) {
   if(str) {
-    let output = '';
+    let output = str;
     let scheme = 'http://';
     if(!str.includes(scheme)) {
       output = scheme + str;
@@ -275,8 +275,10 @@ server.post('/urls/:id', (req, res) => {
     templateVars.error = false;
     return;
   }
-  let updatedURL = toHTTP(req.body['updatedURL']);
-  urlDatabase[req.params.id]['longURL'] = updatedURL;
+  if(req.body['updatedURL']) {
+    let updatedURL = toHTTP(req.body['updatedURL']);
+    urlDatabase[req.params.id]['longURL'] = updatedURL;
+  }
   res.redirect('/urls/' + req.params.id);
   return;
 });
