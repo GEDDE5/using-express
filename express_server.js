@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const morgan = require('morgan');
 const bcrypt = require('bcrypt');
 const cookieSession = require('cookie-session');
+const methodOverride = require('method-override')
 
 const server = express();
 const PORT = process.env.PORT || 3000;
@@ -18,7 +19,7 @@ server.use(cookieSession({
   name: 'session',
   keys: [process.env.SECRET_KEY || 'developer']
 }));
-
+server.use(methodOverride('_method'));
 
 // Databases
 const urlDatabase = {
@@ -211,6 +212,7 @@ server.post('/register', (req, res) => {
   };
   req.session.user_id = userID;
   res.redirect('/urls');
+  return;
 });
 
 
@@ -244,7 +246,7 @@ server.post('/login', (req, res) => {
 
 // logout route
 
-server.post('/logout', (req, res) => {
+server.delete('/logout', (req, res) => {
   delete req.session.user_id;
   res.redirect('/urls');
 });
@@ -264,7 +266,7 @@ server.get('/urls/new', (req, res) => {
 
 // :shortURL routes
 
-server.post('/urls/:id', (req, res) => {
+server.put('/urls/:id', (req, res) => {
   if(!urlDatabase.hasOwnProperty(req.params.id)) {
     sendError(404, res, 'Error: This short URL does not yet exist');
     return;
@@ -327,7 +329,7 @@ server.get('/u/:shortURL', (req, res) => {
 
 // delete shortURL route
 
-server.post('/urls/:id/delete', (req, res) => {
+server.delete('/urls/:id/delete', (req, res) => {
   if(isLoggedIn(req)) {
     let userID = req.session.user_id;
     let urlID = req.params.id;
@@ -338,7 +340,8 @@ server.post('/urls/:id/delete', (req, res) => {
     }
   }
   sendError(400, res, 'Error: Not authorized to delete link');
-});
+})
+
 
 
 
