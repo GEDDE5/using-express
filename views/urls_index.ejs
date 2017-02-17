@@ -1,14 +1,16 @@
 <%- include partials/_header %>
 <table class="table table-striped">
   <% if(loggedIn) { %>
-    <% userUrls.forEach((k, i) => { %>
+
   <tr>
     <td>&nbsp;</td>
     <td><h4>Short URL</h4></td>
     <td><h4>Long URL</h4></td>
     <td>&nbsp;</td>
   </tr>
+  <% userUrls.forEach((k, i) => { %>
     <tr>
+
       <td><%= i + 1 %></td>
       <td><a href="/u/<%= k %>">http://localhost:8080/u/<%= k.urlID %></a></td>
       <td>

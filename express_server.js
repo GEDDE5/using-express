@@ -270,6 +270,7 @@ server.post('/urls/:id/delete', (req, res) => {
   if(isLoggedIn(req)) {
     let userID = req.session.user_id;
     let urlID = req.params.id;
+    console.log(urlID, urlDatabase[urlID]);
     if(urlDatabase[urlID]['userID'] === userID) {
       delete urlDatabase[urlID];
       res.redirect('/urls');

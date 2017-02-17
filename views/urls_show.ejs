@@ -16,6 +16,10 @@
             </form>
           </h4>
         </td>
-        <td>&nbsp;</td>
+        <td>
+          <form class="form-inline" method="POST" id="delete" action="/urls/<%= shortURL %>/delete">
+            <button class="btn btn-default btn-xs" id="delete" type="submit">x</button>
+          </form>
+        </td>
       </tr>
     </table>
