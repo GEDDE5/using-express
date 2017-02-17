@@ -212,6 +212,7 @@ server.post('/register', (req, res) => {
   };
   req.session.user_id = userID;
   res.redirect('/urls');
+  return;
 });
 
 
