@@ -187,12 +187,12 @@ server.post('/register', (req, res) => {
     sendError(400, res, 'Error: Email address and/or password were empty');
     return;
   }
-  Object.keys(users).forEach(id => {
+  for(id in users) {
     if(users[id]['email'] === req.body['email']) {
       sendError(400, res, 'Error: Email address already in use');
       return;
     }
-  });
+  }
   // Verifies new user_id isn't already in users DB
   let userID = generateRandomString();
   if(users[userID]) {
