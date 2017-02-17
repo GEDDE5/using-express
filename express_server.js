@@ -128,8 +128,6 @@ server.post('/urls', (req, res) => {
     }
     let longURL = toHTTP(req.body['longURL']);
     let userID = req.session.user_id;
-    // let today = new Date();
-    // let date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate()
     urlDatabase[str] = {
       longURL: longURL,
       userID: userID
