@@ -74,7 +74,11 @@ function urlsForUser(id) {
   let userUrls = [];
   Object.keys(urlDatabase).forEach((u, i) => {
     if(urlDatabase[u].userID === id) {
-      userUrls.push( { urlID: u, url: urlDatabase[u].longURL } );
+      userUrls.push( { urlID: u,
+        url: urlDatabase[u].longURL,
+        date: urlDatabase[u].date,
+        visits: urlDatabase[u].visits
+      });
     }
   });
   return userUrls;
@@ -128,9 +132,22 @@ server.post('/urls', (req, res) => {
     }
     let longURL = toHTTP(req.body['longURL']);
     let userID = req.session.user_id;
+
+    // Grabs date in dd/mm/yyyy format
+    let d = new Date();
+    let today = d.getDate() + '/' + (d.getMonth() + 1) + '/' + d.getFullYear();
+
+    let visits = {
+      visits: 0,
+      unique: 0,
+      ipAddr: req.connection.remoteaddress
+    }
+
     urlDatabase[str] = {
       longURL: longURL,
-      userID: userID
+      userID: userID,
+      date: today,
+      visits: visits
     };
     res.redirect('/urls/' + str);
   }
@@ -201,7 +218,6 @@ server.post('/login', (req, res) => {
     templateVars.error = false;
     return;
   }
-  // Checks against DB to verify user credentials
   Object.keys(users).forEach(id => {
     if(users[id]['email'] === req.body['email']) {
       if(bcrypt.compareSync(req.body['password'], users[id]['password'])) {
@@ -284,7 +300,6 @@ server.get('/urls/:id', (req, res) => {
     templateVars.error = false;
     return;
   }
-  console.log(templateVars);
   res.render('urls_show', templateVars);
 });
 
@@ -294,6 +309,11 @@ server.get('/urls/:id', (req, res) => {
 server.get('/u/:shortURL', (req, res) => {
   let shortURL = req.params.shortURL;
   if(urlDatabase[shortURL]) {
+    if(req.connection.remoteaddress !== urlDatabase[shortURL].visits.ipaddr) {
+      urlDatabase[shortURL].visits.unique++;
+    }
+    urlDatabase[shortURL].visits.visits++;
+    console.log('visit +1');
     let longURL = urlDatabase[shortURL].longURL;
     res.redirect(longURL);
     return;
@@ -310,7 +330,6 @@ server.post('/urls/:id/delete', (req, res) => {
   if(isLoggedIn(req)) {
     let userID = req.session.user_id;
     let urlID = req.params.id;
-    console.log(urlID, urlDatabase[urlID]);
     if(urlDatabase[urlID]['userID'] === userID) {
       delete urlDatabase[urlID];
       res.redirect('/urls');
@@ -322,5 +341,5 @@ server.post('/urls/:id/delete', (req, res) => {
 
 
 server.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+  console.log(`TinyApp listening on :${PORT}!`);
 });
