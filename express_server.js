@@ -120,7 +120,7 @@ server.get('/urls', (req, res) => {
     res.render('urls_index', templateVars);
     return;
   }
-  sendError(401, res, 'Eror: You must be logged in to access this page');
+  sendError(401, res, 'Error: You must be logged in to access this page');
 });
 
 
