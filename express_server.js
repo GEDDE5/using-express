@@ -106,6 +106,7 @@ function sendError(status, res, error) {
 server.get('/', (req, res) => {
   if(isLoggedIn(req)) {
     res.redirect('/urls');
+    return;
   }
   res.redirect('/login');
 });
@@ -157,6 +158,7 @@ server.post('/urls', (req, res) => {
       visits: visits
     };
     res.redirect('/urls/' + str);
+    return;
   }
   sendError(401, res, 'Error: You must be logged in to access this page');
 });
@@ -229,7 +231,6 @@ server.post('/login', (req, res) => {
     }
   });
   sendError(401, res, 'Error: Login credentials do not match any in database');
-  return;
 });
 
 
@@ -323,6 +324,7 @@ server.post('/urls/:id/delete', (req, res) => {
     if(urlDatabase[urlID]['userID'] === userID) {
       delete urlDatabase[urlID];
       res.redirect('/urls');
+      return;
     }
   }
   sendError(400, res, 'Error: Not authorized to delete link');
