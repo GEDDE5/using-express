@@ -29,7 +29,7 @@ const templateVars = {
   urls: urlDatabase,
   users: users,
   user: '',
-  errors: {}
+  error: ''
 }
 
 // Helper functions
@@ -105,9 +105,9 @@ server.get('/urls', (req, res) => {
     res.render('urls_index', templateVars);
     return;
   } else {
-    templateVars.errors.message = 'Error: You must be logged in to access this page'
+    templateVars.error = 'Error: You must be logged in to access this page'
     res.status(401).render('urls_index', templateVars);
-    delete templateVars.errors.message;
+    templateVars.error = false;
     return;
   }
 });
@@ -147,16 +147,16 @@ server.get('/register', (req, res) => {
 
 server.post('/register', (req, res) => {
   if(!req.body['email'] || !req.body['password']) {
-    templateVars.errors.message = 'Error: Email address and/or password were empty';
+    templateVars.error = 'Error: Email address and/or password were empty';
     res.status(400).render('urls_index', templateVars );
-    delete templateVars.errors.message
+    templateVars.error = false;
     return;
   }
   Object.keys(users).forEach(id => {
     if(users[id]['email'] === req.body['email']) {
-      templateVars.errors.message = 'Error: Email address already in use';
+      templateVars.error = 'Error: Email address already in use';
       res.status(400).render('urls_index', templateVars );
-      delete templateVars.errors.message
+      templateVars.error = false;
       return;
     }
   });
@@ -194,9 +194,9 @@ server.get('/login', (req, res) => {
 
 server.post('/login', (req, res) => {
   if(!req.body['email'] || !req.body['password']) {
-    templateVars.errors.message = 'Error: Email address and/or password were empty'
+    templateVars.error = 'Error: Email address and/or password were empty'
     res.status(400).render('urls_index', templateVars);
-    delete templateVars.errors.message;
+    templateVars.error = false;
     return;
   }
   // Checks against DB to verify user credentials
@@ -209,9 +209,9 @@ server.post('/login', (req, res) => {
       }
     }
   });
-  templateVars.errors.message = 'Error: Login credentials do not match any in database';
+  templateVars.error = 'Error: Login credentials do not match any in database';
   res.status(401).render('urls', templateVars );
-  delete templateVars.errors.message
+  templateVars.error = false;
   return;
 });
 
@@ -229,16 +229,13 @@ server.post('/logout', (req, res) => {
 // new shortURL route
 
 server.get('/urls/new', (req, res) => {
-  let templateVars = {
-    users: users,
-    user: req.session.user_id,
-    errors: {}
-  };
+  templateVars.user = req.session.user_id;
   if(!isLoggedIn(req)) {
-    res.status(401).redirect('/urls');
+    templateVars.error = 'Error: You must be logged in to access this page';
+    res.status(401).render('urls_show', templateVars);
+    templateVars.error = false;
     return;
   }
-
   res.render('urls_new', templateVars);
 });
 
@@ -248,19 +245,19 @@ server.get('/urls/new', (req, res) => {
 
 server.post('/urls/:id', (req, res) => {
   if(!urlDatabase.hasOwnProperty(req.params.id)) {
-    templateVars.errors.message = 'Error: This short URL does not exist';
+    templateVars.error = 'Error: This short URL does not yet exist';
     res.status(404).render('urls_show', templateVars);
-    delete templateVars.errors.message;
+    templateVars.error = false;
     return;
   } else if(!isLoggedIn(req)) {
-      templateVars.errors.message = 'Error: You must be logged into access this page';
+      templateVars.error = 'Error: You must be logged into access this page';
       res.status(401).render('urls_show', templateVars);
-      delete templateVars.errors.message;
+      templateVars.error = false;
       return;
   } else if(urlDatabase[req.params.id].userID !== req.session.user_id) {
-      templateVars.errors.message = 'Error: You do not have sufficient credentials to access this short URL';
+      templateVars.error = 'Error: You do not have sufficient credentials to access this short URL';
       res.status(403).render('urls_show', templateVars);
-      delete templateVars.errors.message;
+      templateVars.error = false;
       return;
   }
   if(urlDatabase[req.params.id]['userID'] === req.session.user_id) {
@@ -272,27 +269,22 @@ server.post('/urls/:id', (req, res) => {
 });
 
 server.get('/urls/:id', (req, res) => {
-  let templateVars = {
-  shortURL: req.params.id,
-  urls: urlDatabase,
-  users: users,
-  user: req.session.user_id,
-  errors: {}
-  };
+  templateVars.shortURL = req.params.id;
+  templateVars.user = req.session.user_id;
   if(!urlDatabase.hasOwnProperty(req.params.id)) {
-    templateVars.errors.message = 'Error: This short URL does not exist';
+    templateVars.error = 'Error: This short URL does not exist';
     res.status(404).render('urls_show', templateVars);
-    delete templateVars.errors.message;
+    templateVars.error = false;
     return;
   } else if(!isLoggedIn(req)) {
-      templateVars.errors.message = 'Error: You must be logged into access this page';
+      templateVars.error = 'Error: You must be logged into access this page';
       res.status(401).render('urls_show', templateVars);
-      delete templateVars.errors.message;
+      templateVars.error = false;
       return;
   } else if(urlDatabase[req.params.id].userID !== req.session.user_id) {
-      templateVars.errors.message = 'Error: You do not have sufficient credentials to access this short URL';
+      templateVars.error = 'Error: You do not have sufficient credentials to access this short URL';
       res.status(403).render('urls_show', templateVars);
-      delete templateVars.errors.message;
+      templateVars.error = false;
       return;
   }
   console.log(templateVars);
@@ -309,8 +301,9 @@ server.get('/u/:shortURL', (req, res) => {
     res.redirect(longURL);
     return;
   }
-  templateVars.errors.message = 'Error: This short URL has not yet been created'
+  templateVars.error = 'Error: This short URL has not yet been created'
   res.status(404).render('urls_index', templateVars);
+  templateVars.error = false;
 });
 
 // delete shortURL route
