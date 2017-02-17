@@ -32,7 +32,7 @@
         <% } %>
       </td>
       <td>
-        <form class="form-inline" method="POST" id="delete" action="/urls/<%= url.urlID %>/delete">
+        <form class="form-inline" method="POST" id="delete" action="/urls/<%= url.urlID %>/delete?_method=DELETE">
           <button class="btn btn-danger btn-xs" id="delete" type="submit">&nbsp;x&nbsp;</button>
         </form>
       </td>
