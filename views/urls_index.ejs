@@ -1,7 +1,9 @@
 <%- include partials/_header %>
+<% if(Object.keys(errors).length !== 0) { %>
+  <p><%= errors.message %></p>
+<% } else { %>
 <table class="table table-striped">
   <% if(loggedIn) { %>
-
   <tr>
     <td>&nbsp;</td>
     <td><h4>Short URL</h4></td>
@@ -10,9 +12,8 @@
   </tr>
   <% userUrls.forEach((k, i) => { %>
     <tr>
-
       <td><%= i + 1 %></td>
-      <td><a href="/u/<%= k %>">http://localhost:8080/u/<%= k.urlID %></a></td>
+      <td><a href="/u/<%= k.urlID %>">http://localhost:8080/u/<%= k.urlID %></a></td>
       <td>
         <form class="form-inline" method="GET" id="update" action="/urls/<%= k.urlID %>">
           <label for="update"><%= k.url %></label>
@@ -28,10 +29,7 @@
       </td>
     </tr>
     <% }); %>
-  <% } else { %>
-    <td>&nbsp;</td>
-    <td>Please <a href="/login">login</a> (or <a href="/register">register</a>) to continue</td>
-    <td>&nbsp;</td>
   <% } %>
 </table>
+<% } %>
 <%- include partials/_footer %>
