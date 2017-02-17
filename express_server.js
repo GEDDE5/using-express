@@ -87,6 +87,12 @@ function urlsForUser(id) {
   return userUrls;
 }
 
+function sendError(status, res, error) {
+  templateVars.error = error;
+  res.status(status).render('urls_index', templateVars);
+  templateVars.error = false;
+  return;
+}
 
 
 /**
@@ -115,10 +121,7 @@ server.get('/urls', (req, res) => {
     res.render('urls_index', templateVars);
     return;
   }
-  templateVars.error = 'Error: You must be logged in to access this page';
-  res.status(401).render('urls_index', templateVars);
-  templateVars.error = false;
-  return;
+  sendError(401, res, 'Eror: You must be logged in to acces this page');
 });
 
 
@@ -155,9 +158,7 @@ server.post('/urls', (req, res) => {
     };
     res.redirect('/urls/' + str);
   }
-  templateVars.error = 'Error: You must be logged in to access this page';
-  res.status(401).render('urls_index', templateVars);
-  templateVars.error = false;
+  sendError(401, res, 'Error: You must be logged in to access this page');
 });
 
 
@@ -173,16 +174,12 @@ server.get('/register', (req, res) => {
 
 server.post('/register', (req, res) => {
   if(!req.body['email'] || !req.body['password']) {
-    templateVars.error = 'Error: Email address and/or password were empty';
-    res.status(400).render('urls_index', templateVars );
-    templateVars.error = false;
+    sendError(400, res, 'Error: Email address and/or password were empty');
     return;
   }
   Object.keys(users).forEach(id => {
     if(users[id]['email'] === req.body['email']) {
-      templateVars.error = 'Error: Email address already in use';
-      res.status(400).render('urls_index', templateVars );
-      templateVars.error = false;
+      sendError(400, res, 'Error: Email address already in use');
       return;
     }
   });
@@ -219,9 +216,7 @@ server.get('/login', (req, res) => {
 
 server.post('/login', (req, res) => {
   if(!req.body['email'] || !req.body['password']) {
-    templateVars.error = 'Error: Email address and/or password were empty';
-    res.status(400).render('urls_index', templateVars);
-    templateVars.error = false;
+    sendError(400, res, 'Error: Email address and/or password were empty');
     return;
   }
   Object.keys(users).forEach(id => {
@@ -233,9 +228,7 @@ server.post('/login', (req, res) => {
       }
     }
   });
-  templateVars.error = 'Error: Login credentials do not match any in database';
-  res.status(401).render('urls_index', templateVars );
-  templateVars.error = false;
+  sendError(401, res, 'Error: Login credentials do not match any in database');
   return;
 });
 
@@ -253,9 +246,7 @@ server.post('/logout', (req, res) => {
 server.get('/urls/new', (req, res) => {
   templateVars.user = req.session.user_id;
   if(!isLoggedIn(req)) {
-    templateVars.error = 'Error: You must be logged in to access this page';
-    res.status(401).render('urls_show', templateVars);
-    templateVars.error = false;
+    sendError(401, res, 'Error: You must be logged in to access this page');
     return;
   }
   res.render('urls_new', templateVars);
@@ -266,19 +257,13 @@ server.get('/urls/new', (req, res) => {
 
 server.post('/urls/:id', (req, res) => {
   if(!urlDatabase.hasOwnProperty(req.params.id)) {
-    templateVars.error = 'Error: This short URL does not yet exist';
-    res.status(404).render('urls_show', templateVars);
-    templateVars.error = false;
+    sendError(404, res, 'Error: This short URL does not yet exist');
     return;
   } else if(!isLoggedIn(req)) {
-    templateVars.error = 'Error: You must be logged into access this page';
-    res.status(401).render('urls_show', templateVars);
-    templateVars.error = false;
+    sendError(401, res, 'Error: You must be logged into access this page');
     return;
   } else if(urlDatabase[req.params.id].userID !== req.session.user_id) {
-    templateVars.error = 'Error: You do not have sufficient credentials to access this short URL';
-    res.status(403).render('urls_show', templateVars);
-    templateVars.error = false;
+    sendError(403, res, 'Error: You do not have sufficient credentials to acces this short URL')
     return;
   }
   if(req.body['updatedURL']) {
@@ -293,19 +278,13 @@ server.get('/urls/:id', (req, res) => {
   templateVars.shortURL = req.params.id;
   templateVars.user = req.session.user_id;
   if(!urlDatabase.hasOwnProperty(req.params.id)) {
-    templateVars.error = 'Error: This short URL does not exist';
-    res.status(404).render('urls_show', templateVars);
-    templateVars.error = false;
+    sendError(404, res, 'Error: This short URL does not exist');
     return;
   } else if(!isLoggedIn(req)) {
-    templateVars.error = 'Error: You must be logged into access this page';
-    res.status(401).render('urls_show', templateVars);
-    templateVars.error = false;
+    sendError(401, res, 'Error: You must be logged in to access this page');
     return;
   } else if(urlDatabase[req.params.id].userID !== req.session.user_id) {
-    templateVars.error = 'Error: You do not have sufficient credentials to access this short URL';
-    res.status(403).render('urls_show', templateVars);
-    templateVars.error = false;
+    sendError(403, res, 'Error: You do not have sufficient credentials to access this short URL');
     return;
   }
   res.render('urls_show', templateVars);
@@ -317,7 +296,6 @@ server.get('/urls/:id', (req, res) => {
 server.get('/u/:shortURL', (req, res) => {
   let shortURL = req.params.shortURL;
   if(urlDatabase[shortURL]) {
-    console.log(urlDatabase[shortURL].visits.ipAddr.length);
     if(urlDatabase[shortURL].visits.ipAddr.length === 0) {
       urlDatabase[shortURL].visits.ipAddr.push(req.connection.remoteAddress);
       urlDatabase[shortURL].visits.unique++;
@@ -329,18 +307,13 @@ server.get('/u/:shortURL', (req, res) => {
         }
       });
     }
-    console.log(urlDatabase[shortURL].visits);
     urlDatabase[shortURL].visits.visits++;
-    console.log('visit +1');
     let longURL = urlDatabase[shortURL].longURL;
     res.redirect(longURL);
     return;
   }
-  templateVars.error = 'Error: This short URL has not yet been created';
-  res.status(404).render('urls_index', templateVars);
-  templateVars.error = false;
+  sendError(404, res, 'Error: This short URL has not yet been created');
 });
-
 
 // delete shortURL route
 
@@ -353,7 +326,7 @@ server.post('/urls/:id/delete', (req, res) => {
       res.redirect('/urls');
     }
   }
-  res.send(401, 'Error: Not authorized to delete link');
+  sendError(400, res, 'Error: Not authorized to delete link');
 });
 
 
