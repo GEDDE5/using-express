@@ -122,7 +122,7 @@ server.get('/urls', (req, res) => {
     res.render('urls_index', templateVars);
     return;
   }
-  sendError(401, res, 'Eror: You must be logged in to acces this page');
+  sendError(401, res, 'Eror: You must be logged in to access this page');
 });
 
 
@@ -264,7 +264,7 @@ server.post('/urls/:id', (req, res) => {
     sendError(401, res, 'Error: You must be logged into access this page');
     return;
   } else if(urlDatabase[req.params.id].userID !== req.session.user_id) {
-    sendError(403, res, 'Error: You do not have sufficient credentials to acces this short URL')
+    sendError(403, res, 'Error: You do not have sufficient credentials to access this short URL')
     return;
   }
   if(req.body['updatedURL']) {
@@ -278,7 +278,7 @@ server.post('/urls/:id', (req, res) => {
 server.get('/urls/:id', (req, res) => {
   templateVars.url = req.params.id;
   if(!urlDatabase.hasOwnProperty(req.params.id)) {
-    sendError(404, res, 'Error: This short URL does not exist');
+    sendError(404, res, 'Error: This short URL does not yet exist');
     return;
   } else if(!isLoggedIn(req)) {
     sendError(401, res, 'Error: You must be logged in to access this page');
