@@ -275,8 +275,7 @@ server.post('/urls/:id', (req, res) => {
 });
 
 server.get('/urls/:id', (req, res) => {
-  templateVars.shortURL = req.params.id;
-  templateVars.user = req.session.user_id;
+  templateVars.url = req.params.id;
   if(!urlDatabase.hasOwnProperty(req.params.id)) {
     sendError(404, res, 'Error: This short URL does not exist');
     return;
