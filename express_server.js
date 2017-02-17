@@ -129,7 +129,6 @@ server.get('/urls', (req, res) => {
 
 server.post('/urls', (req, res) => {
   if(isLoggedIn(req)) {
-    console.log(req.body);
     // if shortURL alreadys exists in database, generate another
     // until shortURL's value cannot be found in urlDatabase
     if(!req.body['longURL']) {
@@ -159,7 +158,6 @@ server.post('/urls', (req, res) => {
       unique: 0,
       ipAddr: []
     };
-    console.log(visits);
     urlDatabase[str] = {
       longURL: longURL,
       userID: userID,
