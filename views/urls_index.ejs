@@ -13,7 +13,7 @@
   </tr>
   <% userUrls.forEach((url, i) => { %>
     <tr>
-      <td ><%= url.date %></td>
+      <td><%= url.date %></td>
       <td><a href="/u/<%= url.urlID %>">http://localhost/u/<%= url.urlID %></a></td>
       <td>
         <form class="form-inline" method="GET" id="update" action="/urls/<%= url.urlID %>">
@@ -30,6 +30,7 @@
         <% } else { %>
           (0)
         <% } %>
+      </td>
       <td>
         <form class="form-inline" method="POST" id="delete" action="/urls/<%= url.urlID %>/delete">
           <button class="btn btn-danger btn-xs" id="delete" type="submit">&nbsp;x&nbsp;</button>

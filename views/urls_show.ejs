@@ -12,10 +12,12 @@
     </tr>
     <tr>
       <td><%= urls[url].date %></td>
-      <td><a href="/u/<%= url %>">http://localhost/u/<%= url %></a></td>
+      <td>
+        <a href="/u/<%= url %>">http://localhost/u/<%= url %></a>
+      </td>
       <td>
         <form class="form-inline" method="POST" id="edit" action="/urls/<%= url %>">
-          <input id="edit" name="updatedURL" value="<%= urls[url].longURL %>"></input>
+          <input id="edit" name="updatedURL" value="<%= urls[url].longURL %>" class="input input-group">
           <button id="edit" class="btn btn-default btn-xs" type="submit">
             Update
           </button>
@@ -28,7 +30,7 @@
         <% } else { %>
           (0)
         <% } %>
-      <td>
+      </td>
       <td>
         <form class="form-inline" method="POST" id="delete" action="/urls/<%= url %>/delete">
           <button class="btn btn-danger btn-xs" id="delete" type="submit">&nbsp;x&nbsp;</button>

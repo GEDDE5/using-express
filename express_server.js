@@ -130,13 +130,19 @@ server.get('/urls', (req, res) => {
 
 server.post('/urls', (req, res) => {
   if(isLoggedIn(req)) {
+    console.log(req.body);
     // if shortURL alreadys exists in database, generate another
     // until shortURL's value cannot be found in urlDatabase
-    let str = generateRandomString();
-    if (urlDatabase[str]) {
-      while (urlDatabase[str]) {
-        str = generateRandomString();
+    let str = '';
+    if(!req.body['custom']) {
+      str = generateRandomString();
+      if (urlDatabase[str]) {
+        while (urlDatabase[str]) {
+          str = generateRandomString();
+        }
       }
+    } else {
+      str = req.body['custom'];
     }
     let longURL = toHTTP(req.body['longURL']);
     let userID = req.session.user_id;
