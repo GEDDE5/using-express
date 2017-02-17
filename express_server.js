@@ -59,7 +59,8 @@ function toHTTP(str) {
 
 function isLoggedIn(req) {
   // must use for...in instead of Object.keys().forEach() because
-  // forEach is impervious against breaking loop before completion
+  // forEach is impervious* against breaking loop before completion
+  // ???
   if(req.session.user_id) {
     for(let u in users) {
       if(users[u]['id'] === req.session.user_id) {
@@ -85,9 +86,11 @@ function urlsForUser(id) {
 }
 
 
-////////////////////
-// TinyApp Routes //
-////////////////////
+
+/**
+ *  TinyApp Routes
+ */
+
 
 
 // root route
@@ -141,7 +144,7 @@ server.post('/urls', (req, res) => {
       visits: 0,
       unique: 0,
       ipAddr: req.connection.remoteaddress
-    }
+    };
 
     urlDatabase[str] = {
       longURL: longURL,
