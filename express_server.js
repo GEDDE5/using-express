@@ -1,6 +1,5 @@
 const express = require('express');
 const bodyParser = require("body-parser");
-const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 const bcrypt = require('bcrypt');
 const cookieSession = require('cookie-session');
@@ -14,7 +13,6 @@ server.set("view engine", "ejs");
 // Middlewares
 server.use(express.static('public'));
 server.use(bodyParser.urlencoded({ extended: true }));
-server.use(cookieParser());
 server.use(morgan('dev'));
 server.use(cookieSession({
   name: 'session',
