@@ -229,7 +229,7 @@ server.post('/login', (req, res) => {
     sendError(400, res, 'Error: Email address and/or password were empty');
     return;
   }
-  Object.keys(users).forEach(id => {
+  for(id in users) {
     if(users[id]['email'] === req.body['email']) {
       if(bcrypt.compareSync(req.body['password'], users[id]['password'])) {
         req.session.user_id = users[id]['id'];
@@ -237,7 +237,7 @@ server.post('/login', (req, res) => {
         return;
       }
     }
-  });
+  }
   sendError(401, res, 'Error: Login credentials do not match any in database');
 });
 
