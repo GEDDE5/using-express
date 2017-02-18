@@ -11,6 +11,8 @@ A "full stack" web app built w/ node and express that allows users to shorten lo
 
 In terminal:
 ```js
+git clone https://github.com/GEDDE5/using-express tiny-app
+cd tiny-app
 npm install
 npm start
 ```
