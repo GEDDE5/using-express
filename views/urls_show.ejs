@@ -38,4 +38,19 @@
       </td>
     </tr>
   </table>
+  <table class="table" style="width: auto;">
+    <th class="text-center" colspan="2">
+      <h5>Visitors</h5>
+    </th>
+    <tr>
+      <td class="col-md-6 text-right"><b>Date/Time<b></td>
+      <td class="col-md-6 text-right"><b>IP<b></td>
+    </tr>
+    <% for(visitor of urls[url].visits.visitors) { %>
+      <tr>
+        <td class="text-right"><%= visitor.dateTime %></td>
+        <td class="text-right"><%= visitor.ip %>
+      </tr>
+    <% } %>
+  </table>
   <% } %>

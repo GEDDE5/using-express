@@ -156,7 +156,7 @@ server.post('/urls', (req, res) => {
     let visits = {
       visits: 0,
       unique: 0,
-      ipAddr: []
+      visitors: []
     };
     urlDatabase[str] = {
       longURL: longURL,
@@ -286,7 +286,6 @@ server.put('/urls/:id', (req, res) => {
 });
 
 server.get('/urls/:id', (req, res) => {
-  templateVars.url = req.params.id;
   if(!urlDatabase.hasOwnProperty(req.params.id)) {
     sendError(404, res, 'Error: This short URL does not yet exist');
     return;
@@ -297,6 +296,7 @@ server.get('/urls/:id', (req, res) => {
     sendError(403, res, 'Error: You do not have sufficient credentials to access this short URL');
     return;
   }
+  templateVars.url = req.params.id;
   res.render('urls_show', templateVars);
 });
 
@@ -306,16 +306,22 @@ server.get('/urls/:id', (req, res) => {
 server.get('/u/:shortURL', (req, res) => {
   let shortURL = req.params.shortURL;
   if(urlDatabase[shortURL]) {
-    if(urlDatabase[shortURL].visits.ipAddr.length === 0) {
-      urlDatabase[shortURL].visits.ipAddr.push(req.connection.remoteAddress);
+    // Handles tracking of unique IPs
+    let dateTime = new Date().toLocaleString("en-US", {timeZone: "America/Vancouver"})
+    if(urlDatabase[shortURL].visits.visitors.length === 0) {
+      urlDatabase[shortURL].visits.visitors.push( { ip: req.connection.remoteAddress, dateTime: dateTime } );
       urlDatabase[shortURL].visits.unique++;
-    } else {
-      urlDatabase[shortURL].visits.ipAddr.forEach(ip => {
-        if(req.connection.remoteAddress !== ip) {
-          urlDatabase[shortURL].visits.ipAddr.push(req.connection.remoteAddress);
-          urlDatabase[shortURL].visits.unique++;
-        }
-      });
+    }
+    let unique = true;
+    for(visitor of urlDatabase[shortURL].visits.visitors) {
+      if(req.connection.remoteAddress === visitor['ip']) {
+        unique = false;
+        break;
+      }
+    }
+    if(unique) {
+      urlDatabase[shortURL].visits.visitors.push( { ip: req.connection.remoteAddress, dateTime: dateTime } );
+      urlDatabase[shortURL].visits.unique++;
     }
     urlDatabase[shortURL].visits.visits++;
     let longURL = urlDatabase[shortURL].longURL;
