@@ -22,4 +22,9 @@ In browser:
 http://localhost:3000/urls
 ```
 
+## New features list
+
+* Update the long URL associated w/ the short URL
+* Track visitors' IP and access date/time
+
 
